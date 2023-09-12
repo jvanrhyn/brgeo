@@ -10,12 +10,18 @@ import (
 
 func StartAndServe() {
 
+	port := os.Getenv("PORT")
+
+	slog.Info("Starting server on port", "port", port)
 	app := fiber.New()
 	group := app.Group("/api")
 
 	group.Get("/lookup/:ipaddress", getGeoInfo)
 
-	port := os.Getenv("PORT")
+	err := app.Listen(":" + port)
+	if err != nil {
+		slog.Error("Error starting server", "error", err)
+	}
 
 }
 
@@ -26,6 +32,8 @@ func getGeoInfo(c *fiber.Ctx) error {
 	slog.Info("Retrieval information", "ipaddress", ipaddress, "retries", retry)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"city": geo.City,
+		"city":    geo.City,
+		"region":  geo.RegionName,
+		"country": geo.CountryName,
 	})
 }

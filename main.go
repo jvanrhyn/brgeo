@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
-
-	"brightrock.co.za/brgeo/api"
+	"brightrock.co.za/brgeo/controller"
 	"github.com/joho/godotenv"
 )
 
@@ -18,9 +16,10 @@ func init() {
 
 func main() {
 
-	ipaddress := "169.1.245.236"
-	geodata, retry := api.GetGeoInfo(ipaddress)
+	controller.StartAndServe()
+	// ipaddress := "169.1.245.236"
+	// geodata, retry := api.GetGeoInfo(ipaddress)
 
-	fmt.Printf("You live in %s\nRetried %d times", geodata.City, retry)
+	// fmt.Printf("You live in %s\nRetried %d times", geodata.City, retry)
 
 }
