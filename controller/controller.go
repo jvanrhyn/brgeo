@@ -5,7 +5,9 @@ import (
 	"os"
 
 	"brightrock.co.za/brgeo/api"
+	"brightrock.co.za/brgeo/model"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jinzhu/copier"
 )
 
 func StartAndServe() {
@@ -31,9 +33,11 @@ func getGeoInfo(c *fiber.Ctx) error {
 	geo, retry := api.GetGeoInfo(ipaddress)
 	slog.Info("Retrieval information", "ipaddress", ipaddress, "retries", retry)
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"city":    geo.City,
-		"region":  geo.RegionName,
-		"country": geo.CountryName,
-	})
+	lresp := model.LookupResponse{}
+
+	// Copy attributes between two structures
+	// where structs have the same fields
+	copier.Copy(&lresp, &geo)
+
+	return c.Status(fiber.StatusOK).JSON(lresp)
 }

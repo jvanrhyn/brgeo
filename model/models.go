@@ -27,3 +27,9 @@ type GeoData struct {
 	Timezone      string      `json:"timezone"`
 	Datetime      interface{} `json:"datetime"`
 }
+
+type LookupResponse struct {
+	City        string `json:"city"`
+	RegionName  string `json:"region"`
+	CountryName string `json:"country"`
+}
