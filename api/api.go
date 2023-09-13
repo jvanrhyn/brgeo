@@ -72,11 +72,3 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 
 	return geoResponse.Data.Geo, retry
 }
-
-func getEnv[T string | int](key string, defaultValue T) T {
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		return defaultValue
-	}
-	return value
-}
