@@ -2,13 +2,16 @@ module brightrock.co.za/brgeo
 
 go 1.21.1
 
-require github.com/joho/godotenv v1.5.1
+require (
+	github.com/gofiber/fiber/v2 v2.49.1
+	github.com/jinzhu/copier v0.4.0
+	github.com/joho/godotenv v1.5.1
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/gofiber/fiber/v2 v2.49.1 // indirect
 	github.com/google/uuid v1.3.1 // indirect
-	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
