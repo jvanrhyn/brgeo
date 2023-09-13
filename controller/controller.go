@@ -24,7 +24,6 @@ func StartAndServe() {
 	if err != nil {
 		slog.Error("Error starting server", "error", err)
 	}
-
 }
 
 func getGeoInfo(c *fiber.Ctx) error {
@@ -37,7 +36,10 @@ func getGeoInfo(c *fiber.Ctx) error {
 
 	// Copy attributes between two structures
 	// where structs have the same fields
-	copier.Copy(&lresp, &geo)
+	err := copier.Copy(&lresp, &geo)
+	if err != nil {
+		return err
+	}
 
 	return c.Status(fiber.StatusOK).JSON(lresp)
 }

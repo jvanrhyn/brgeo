@@ -10,8 +10,9 @@ func TestCanGetLocation(t *testing.T) {
 
 	t.Parallel()
 
-	os.Setenv("USER_AGENT", "keycdn-tools:https://www.b.co.za")
-	os.Setenv("SERVICE_URL", "https://tools.keycdn.com/geo.json")
+	_ = os.Setenv("USER_AGENT", "keycdn-tools:https://www.b.co.za")
+	_ = os.Setenv("SERVICE_URL", "https://tools.keycdn.com/geo.json")
+	_ = os.Setenv("MAX_RETRIES", "3")
 
 	testCases := map[string]struct {
 		value string

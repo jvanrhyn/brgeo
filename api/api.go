@@ -6,14 +6,15 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"brightrock.co.za/brgeo/model"
 )
 
 // GetGeoInfo accepts an IP Address to perform a lookup
-// of the geo-location infomation of the IP Address
-// form KeyCDN's Geo service.
+// of the geolocation information of the IP Address
+// form KeyCDNs' Geo service.
 // This service is rate limited to a maximum of 3 calls per second.
 func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 
@@ -32,7 +33,7 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 	var resp *http.Response
 
 	// Setup for a backoff retry pattern
-	maxRetries := 3
+	maxRetries, _ := strconv.Atoi(os.Getenv("MAX_RETRIES"))
 	baseInterval := 500 * time.Millisecond
 	retryFactor := 2.0
 	retry := 0
@@ -70,4 +71,12 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 	}
 
 	return geoResponse.Data.Geo, retry
+}
+
+func getEnv[T string | int](key string, defaultValue T) T {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return defaultValue
+	}
+	return value
 }
