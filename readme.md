@@ -15,6 +15,7 @@ type LookupResponse struct {
 }
 ```
 
+Query results are cached using the `github.com/patrickmn/go-cache` library. 
 ## Go version
 
 The minimum required version for Go is `1.21.1` becasue of the inclusion of the `log/slog` package, used for structured logging within the application.

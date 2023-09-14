@@ -3,6 +3,7 @@ package controller
 import (
 	"log/slog"
 	"os"
+	"time"
 
 	"brightrock.co.za/brgeo/api"
 	"brightrock.co.za/brgeo/model"
@@ -32,10 +33,10 @@ func getGeoInfo(c *fiber.Ctx) error {
 	var err error
 
 	// Try and find the element in the Cache
-	cachegeo, err := api.GetCacheById(ipaddress)
+	cg, err := api.GetCacheById(ipaddress)
 	if err == nil {
 		slog.Info("Retrieved item from cache for ip", "ipaddress", ipaddress)
-		return c.Status(fiber.StatusOK).JSON(cachegeo)
+		return c.Status(fiber.StatusOK).JSON(cg)
 	}
 
 	geo, retry := api.GetGeoInfo(ipaddress)
@@ -49,6 +50,14 @@ func getGeoInfo(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	req := model.LookupRequest{
+		IpAddress:    ipaddress,
+		LookupTime:   time.Now(),
+		LookupStatus: true,
+	}
+
+	api.Record(&req)
 
 	// Store the item in the cache
 	api.SetCacheItem(ipaddress, &lresp)

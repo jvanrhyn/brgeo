@@ -1,6 +1,7 @@
 package main
 
 import (
+	"brightrock.co.za/brgeo/api"
 	"brightrock.co.za/brgeo/controller"
 	"github.com/joho/godotenv"
 )
@@ -14,5 +15,6 @@ func init() {
 }
 
 func main() {
+	api.InitDatabase()
 	controller.StartAndServe()
 }

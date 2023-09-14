@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Response struct {
 	Status      string `json:"status"`
 	Description string `json:"description"`
@@ -32,4 +34,10 @@ type LookupResponse struct {
 	City        string `json:"city"`
 	RegionName  string `json:"region"`
 	CountryName string `json:"country"`
+}
+
+type LookupRequest struct {
+	IpAddress    string    `json:"ip_address"`
+	LookupTime   time.Time `json:"lookup_time"`
+	LookupStatus bool      `json:"lookup_status"`
 }
