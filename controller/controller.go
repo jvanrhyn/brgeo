@@ -21,6 +21,10 @@ func StartAndServe() {
 
 	group.Get("/lookup/:ipaddress", getGeoInfo)
 
+	mgroup := app.Group("/_config")
+
+	mgroup.Post("/cache", clearCache)
+
 	err := app.Listen(":" + port)
 	if err != nil {
 		slog.Error("Error starting server", "error", err)
@@ -60,8 +64,14 @@ func getGeoInfo(c *fiber.Ctx) error {
 	api.Record(&req)
 
 	// Store the item in the cache
-	api.SetCacheItem(ipaddress, &lresp)
+	api.AddCacheItem(ipaddress, &lresp)
 	slog.Info("Added item to cache for ip", "ipaddress", ipaddress)
 
 	return c.Status(fiber.StatusOK).JSON(lresp)
+}
+
+func clearCache(c *fiber.Ctx) error {
+	slog.Info("Clearing cache")
+	api.Cache.Flush()
+	return c.SendStatus(fiber.StatusOK)
 }

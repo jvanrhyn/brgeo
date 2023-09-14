@@ -24,17 +24,9 @@ type CacheItem []struct {
 	Data *model.LookupResponse `json:"data"`
 }
 
-// init function is called before the main function
-func init() {
-	cacheTimeout, err = strconv.Atoi(os.Getenv("CACHE_TIMEOUT_SEC"))
-	if err != nil {
-		slog.Info("Could not retrieve CACHE_TIMEOUT_SEC", "error", err)
-		cacheTimeout = 60
-	}
-}
-
 // GetCacheById retrieves an item from the cache for the given key
 func GetCacheById(id string) (*model.LookupResponse, error) {
+	slog.Info("Retrieving item from cache", "id", id)
 	item, found := Cache.Get(id)
 	if found {
 		return item.(*model.LookupResponse), nil
@@ -42,11 +34,27 @@ func GetCacheById(id string) (*model.LookupResponse, error) {
 	return &model.LookupResponse{}, errors.New("not found")
 }
 
-// SetCacheItem sets an item in the cache for the given key
-func SetCacheItem(id string, data *model.LookupResponse) {
+// AddCacheItem sets an item in the cache for the given key
+func AddCacheItem(id string, data *model.LookupResponse) {
+
+	if cacheTimeout == 0 {
+		getTimeoutSeconds()
+	}
 
 	duration := time.Duration(cacheTimeout) * time.Second
 	slog.Info("Cache durations set", "duration", duration)
 
-	Cache.Set(id, data, duration)
+	Cache.Add(id, data, duration)
+	slog.Info("Item added to cache", "id", id, "cache", Cache.Items())
+}
+
+// init function is called before the main function
+func getTimeoutSeconds() {
+	ct := os.Getenv("CACHE_TIMEOUT_SEC")
+	slog.Info("Initializing cache", "timeout", ct)
+	cacheTimeout, err = strconv.Atoi(ct)
+	if err != nil {
+		slog.Info("Could not retrieve CACHE_TIMEOUT_SEC", "error", err)
+		cacheTimeout = 60
+	}
 }

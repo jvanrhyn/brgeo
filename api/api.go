@@ -34,6 +34,8 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 
 	// Setup for a backoff retry pattern
 	maxRetries, _ := strconv.Atoi(os.Getenv("MAX_RETRIES"))
+	slog.Info("Max retries", "retries", maxRetries)
+
 	baseInterval := 500 * time.Millisecond
 	retryFactor := 2.0
 	retry := 0
