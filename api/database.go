@@ -30,6 +30,6 @@ func InitDatabase() {
 func Record(lookupRequest *model.LookupRequest) {
 	tx := db.Create(&lookupRequest)
 	if tx.Error != nil {
-		slog.Error("error while recording lookuo", "error", err)
+		slog.Error("error while recording lookup", "error", err)
 	}
 }
