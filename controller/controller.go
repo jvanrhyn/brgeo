@@ -9,14 +9,19 @@ import (
 	"brightrock.co.za/brgeo/model"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
+	slogfiber "github.com/samber/slog-fiber"
 )
 
 func StartAndServe() {
 
+	logger := slog.Default()
 	port := os.Getenv("PORT")
 
 	slog.Info("Starting server on port", "port", port)
 	app := fiber.New()
+
+	app.Use(slogfiber.New(logger))
+
 	group := app.Group("/api")
 
 	group.Get("/lookup/:ipaddress", getGeoInfo)
