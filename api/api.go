@@ -34,6 +34,10 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 
 	// Setup for a backoff retry pattern
 	maxRetries, _ := strconv.Atoi(os.Getenv("MAX_RETRIES"))
+	if maxRetries < 3 {
+		maxRetries = 3
+	}
+
 	slog.Info("Max retries", "retries", maxRetries)
 
 	baseInterval := 500 * time.Millisecond
@@ -41,6 +45,7 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 	retry := 0
 
 	for i := 0; i < maxRetries; i++ {
+		slog.Info("Attempts Counter", "attempt", i)
 		resp, err = client.Do(req)
 		if err == nil && resp.StatusCode == http.StatusOK {
 			break
@@ -50,7 +55,7 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 		if i < maxRetries-1 {
 			sleepDuration := time.Duration(float64(baseInterval) * float64(i+1) * retryFactor)
 			retry = i
-			slog.Info("Sleeping on error", "duration", sleepDuration)
+			slog.Info("Sleeping on error", "duration", sleepDuration, "error", err)
 			time.Sleep(sleepDuration)
 			continue
 		} else {

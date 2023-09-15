@@ -9,18 +9,18 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/jvanrhyn/brgeo/api"
 	"github.com/jvanrhyn/brgeo/model"
+	slogfiber "github.com/samber/slog-fiber"
 )
 
 func StartAndServe() {
 
-	//logger := slog.Default()
+	logger := slog.Default()
 	port := os.Getenv("PORT")
 
 	slog.Info("Starting server on port", "port", port)
 	app := fiber.New()
 
-	// Removing this call until the the pullrequest is merged
-	//app.Use(slogfiber.New(logger))
+	app.Use(slogfiber.New(logger))
 
 	group := app.Group("/api")
 	cgroup := app.Group("/cache")

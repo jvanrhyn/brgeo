@@ -27,6 +27,12 @@ type CacheItem []struct {
 // GetCacheById retrieves an item from the cache for the given key
 func GetCacheById(id string) (*model.LookupResponse, error) {
 	slog.Info("Retrieving item from cache", "id", id)
+
+	if Cache == nil {
+		slog.Warn("Cache does not exist")
+		return &model.LookupResponse{}, errors.New("not found")
+	}
+
 	item, found := Cache.Get(id)
 	if found {
 		return item.(*model.LookupResponse), nil
