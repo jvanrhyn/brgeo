@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"brightrock.co.za/brgeo/model"
+	"github.com/jvanrhyn/brgeo/model"
 )
 
 // GetGeoInfo accepts an IP Address to perform a lookup

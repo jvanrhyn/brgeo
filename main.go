@@ -6,9 +6,9 @@ import (
 
 	"log/slog"
 
-	"brightrock.co.za/brgeo/api"
-	"brightrock.co.za/brgeo/controller"
 	"github.com/joho/godotenv"
+	"github.com/jvanrhyn/brgeo/api"
+	"github.com/jvanrhyn/brgeo/controller"
 	"github.com/lmittmann/tint"
 )
 

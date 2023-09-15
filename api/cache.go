@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"brightrock.co.za/brgeo/model"
+	"github.com/jvanrhyn/brgeo/model"
 	"github.com/patrickmn/go-cache"
 )
 

@@ -1,4 +1,4 @@
-module brightrock.co.za/brgeo
+module github.com/jvanrhyn/brgeo
 
 go 1.21.1
 

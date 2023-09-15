@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	"brightrock.co.za/brgeo/model"
+	"github.com/jvanrhyn/brgeo/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

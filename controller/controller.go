@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 
-	"brightrock.co.za/brgeo/api"
-	"brightrock.co.za/brgeo/model"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
+	"github.com/jvanrhyn/brgeo/api"
+	"github.com/jvanrhyn/brgeo/model"
 )
 
 func StartAndServe() {

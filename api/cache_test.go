@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"brightrock.co.za/brgeo/model"
+	"github.com/jvanrhyn/brgeo/model"
 )
 
 func TestAddCacheItem(t *testing.T) {
