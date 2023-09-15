@@ -19,10 +19,14 @@ func StartAndServe() {
 	slog.Info("Starting server on port", "port", port)
 	app := fiber.New()
 
+	// Removing this call until the the pullrequest is merged
+	//app.Use(slogfiber.New(logger))
+
 	group := app.Group("/api")
-	// group.Use(slogfiber.New(logger))
+	cgroup := app.Group("/cache")
 
 	group.Get("/lookup/:ipaddress", getGeoInfo)
+	cgroup.Post("/clear", clearCache)
 
 	err := app.Listen(":" + port)
 	if err != nil {
@@ -63,8 +67,12 @@ func getGeoInfo(c *fiber.Ctx) error {
 	api.Record(&req)
 
 	// Store the item in the cache
-	api.AddCacheItem(ipaddress, &lresp)
-	slog.Info("Added item to cache for ip", "ipaddress", ipaddress)
+	err = api.AddCacheItem(ipaddress, &lresp)
+	if err != nil {
+		slog.Error("Error adding item to cache", "error", err)
+	} else {
+		slog.Info("Added item to cache for ip", "ipaddress", ipaddress)
+	}
 
 	return c.Status(fiber.StatusOK).JSON(lresp)
 }

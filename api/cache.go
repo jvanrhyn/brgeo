@@ -35,7 +35,7 @@ func GetCacheById(id string) (*model.LookupResponse, error) {
 }
 
 // AddCacheItem sets an item in the cache for the given key
-func AddCacheItem(id string, data *model.LookupResponse) {
+func AddCacheItem(id string, data *model.LookupResponse) error {
 
 	if cacheTimeout == 0 {
 		getTimeoutSeconds()
@@ -44,8 +44,13 @@ func AddCacheItem(id string, data *model.LookupResponse) {
 	duration := time.Duration(cacheTimeout) * time.Second
 	slog.Info("Cache durations set", "duration", duration)
 
-	Cache.Add(id, data, duration)
+	err := Cache.Add(id, data, duration)
+	if err != nil {
+		slog.Error("Error adding item to cache", "error", err)
+		return err
+	}
 	slog.Info("Item added to cache", "id", id, "cache", Cache.Items())
+	return nil
 }
 
 // init function is called before the main function
