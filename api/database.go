@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/go-errors/errors"
 	"github.com/jvanrhyn/brgeo/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,6 +31,7 @@ func InitDatabase() {
 func Record(lookupRequest *model.LookupRequest) {
 	tx := db.Create(&lookupRequest)
 	if tx.Error != nil {
-		slog.Error("error while recording lookup", "error", err)
+		stack := err.(*errors.Error).ErrorStack()
+		slog.Error("error while recording lookup", "error", err, "stacktrace", stack)
 	}
 }

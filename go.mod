@@ -3,6 +3,7 @@ module github.com/jvanrhyn/brgeo
 go 1.21.1
 
 require (
+	github.com/go-errors/errors v1.5.0
 	github.com/gofiber/fiber/v2 v2.49.1
 	github.com/jinzhu/copier v0.4.0
 	github.com/joho/godotenv v1.5.1

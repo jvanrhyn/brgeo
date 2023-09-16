@@ -1,12 +1,12 @@
 package api
 
 import (
-	"errors"
 	"log/slog"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/go-errors/errors"
 	"github.com/jvanrhyn/brgeo/model"
 	"github.com/patrickmn/go-cache"
 )
@@ -52,7 +52,8 @@ func AddCacheItem(id string, data *model.LookupResponse) error {
 
 	err := Cache.Add(id, data, duration)
 	if err != nil {
-		slog.Error("Error adding item to cache", "error", err)
+		stack := err.(*errors.Error).ErrorStack()
+		slog.Error("Error adding item to cache", "error", err, "stacktrace", stack)
 		return err
 	}
 	slog.Info("Item added to cache", "id", id, "cache", Cache.Items())

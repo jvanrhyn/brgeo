@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-errors/errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
 	"github.com/jvanrhyn/brgeo/api"
@@ -69,7 +70,8 @@ func getGeoInfo(c *fiber.Ctx) error {
 	// Store the item in the cache
 	err = api.AddCacheItem(ipaddress, &lresp)
 	if err != nil {
-		slog.Error("Error adding item to cache", "error", err)
+		stack := err.(*errors.Error).ErrorStack()
+		slog.Error("Error adding item to cache", "error", err, "stacktrace", stack)
 	} else {
 		slog.Info("Added item to cache for ip", "ipaddress", ipaddress)
 	}
