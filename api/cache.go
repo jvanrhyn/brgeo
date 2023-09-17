@@ -52,8 +52,7 @@ func AddCacheItem(id string, data *model.LookupResponse) error {
 
 	err := Cache.Add(id, data, duration)
 	if err != nil {
-		stack := err.(*errors.Error).ErrorStack()
-		slog.Error("Error adding item to cache", "error", err, "stacktrace", stack)
+		slog.Error("Error adding item to cache", "error", err)
 		return err
 	}
 	slog.Info("Item added to cache", "id", id, "cache", Cache.Items())
