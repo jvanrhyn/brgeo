@@ -7,8 +7,8 @@ import (
 	"log/slog"
 
 	"github.com/joho/godotenv"
-	"github.com/jvanrhyn/brgeo/api"
 	"github.com/jvanrhyn/brgeo/controller"
+	"github.com/jvanrhyn/brgeo/internal/api"
 	"github.com/lmittmann/tint"
 )
 

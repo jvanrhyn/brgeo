@@ -8,7 +8,7 @@ import (
 	"github.com/go-errors/errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
-	"github.com/jvanrhyn/brgeo/api"
+	"github.com/jvanrhyn/brgeo/internal/api"
 	"github.com/jvanrhyn/brgeo/model"
 	slogfiber "github.com/samber/slog-fiber"
 )
