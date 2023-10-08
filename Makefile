@@ -1,8 +1,9 @@
 
 BIN=go
+OUTPATH=./bin
 
 build:
-	${BIN} build -v ./...
+	${BIN} build -v -o ${OUTPATH} ./... 
 
 test:
 	go test -race -v ./...
