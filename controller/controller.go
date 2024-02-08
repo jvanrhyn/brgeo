@@ -18,7 +18,7 @@ func StartAndServe() {
 	logger := slog.Default()
 	port := os.Getenv("PORT")
 
-	slog.Info("Starting server on port", "port", port)
+	go slog.Info("Starting server on port", "port", port)
 	app := fiber.New()
 
 	app.Use(slogfiber.New(logger))
@@ -31,7 +31,7 @@ func StartAndServe() {
 
 	err := app.Listen(":" + port)
 	if err != nil {
-		slog.Error("Error starting server", "error", err)
+		go slog.Error("Error starting server", "error", err)
 	}
 }
 
@@ -43,12 +43,12 @@ func getGeoInfo(c *fiber.Ctx) error {
 	// Try and find the element in the Cache
 	cg, err := api.GetCacheById(ipaddress)
 	if err == nil {
-		slog.Info("Retrieved item from cache for ip", "ipaddress", ipaddress)
-		return c.Status(fiber.StatusOK).JSON(cg)
+		go slog.Info("Retrieved item from cache for ip", "ipaddress", ipaddress)
+		c.Status(fiber.StatusOK).JSON(cg)
 	}
 
 	geo, retry := api.GetGeoInfo(ipaddress)
-	slog.Info("Retrieval information", "ipaddress", ipaddress, "retries", retry)
+	go slog.Info("Retrieval information", "ipaddress", ipaddress, "retries", retry)
 
 	lresp := model.LookupResponse{}
 
@@ -71,16 +71,16 @@ func getGeoInfo(c *fiber.Ctx) error {
 	err = api.AddCacheItem(ipaddress, &lresp)
 	if err != nil {
 		stack := err.(*errors.Error).ErrorStack()
-		slog.Error("Error adding item to cache", "error", err, "stacktrace", stack)
+		go slog.Error("Error adding item to cache", "error", err, "stacktrace", stack)
 	} else {
-		slog.Info("Added item to cache for ip", "ipaddress", ipaddress)
+		go slog.Info("Added item to cache for ip", "ipaddress", ipaddress)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(lresp)
 }
 
 func clearCache(c *fiber.Ctx) error {
-	slog.Info("Clearing cache")
+	go slog.Info("Clearing cache")
 	api.Cache.Flush()
 	return c.SendStatus(fiber.StatusOK)
 }

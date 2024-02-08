@@ -50,12 +50,7 @@ func AddCacheItem(id string, data *model.LookupResponse) error {
 	duration := time.Duration(cacheTimeout) * time.Second
 	slog.Info("Cache durations set", "duration", duration)
 
-	err := Cache.Add(id, data, duration)
-	if err != nil {
-		slog.Error("Error adding item to cache", "error", err)
-		return err
-	}
-	slog.Info("Item added to cache", "id", id, "cache", Cache.Items())
+	Cache.Set(id, data, duration)
 	return nil
 }
 
