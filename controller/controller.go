@@ -24,10 +24,10 @@ func StartAndServe() {
 	app.Use(slogfiber.New(logger))
 
 	group := app.Group("/api")
-	cgroup := app.Group("/cache")
+	cacheGroup := app.Group("/cache")
 
 	group.Get("/lookup/:ipaddress", getGeoInfo)
-	cgroup.Post("/clear", clearCache)
+	cacheGroup.Post("/clear", clearCache)
 
 	err := app.Listen(":" + port)
 	if err != nil {

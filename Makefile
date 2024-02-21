@@ -2,11 +2,16 @@
 BIN=go
 OUTPATH=./bin
 
-build: create_build_folder
-	${BIN} build -v -o ${OUTPATH} ./... 
+build: create_build_folder copy_env
+	${BIN} build -v -o ${OUTPATH} ./...
 
 create_build_folder:
-	@mkdir -p bin
+	mkdir -p bin
+
+copy_env:
+	@envfile=$$(find . -name ".env"); \
+	rm -r ${OUTPATH}/.env
+	cp -f $$envfile ${OUTPATH}/
 
 test:
 	go test -race -v ./...

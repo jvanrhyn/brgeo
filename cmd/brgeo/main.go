@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"log/slog"
@@ -13,10 +16,15 @@ import (
 )
 
 func init() {
+
 	// Read Configuration data from the .env file in the project
 	err := godotenv.Load()
 	if err != nil {
-		panic("Error loading .env file : " + err.Error())
+		envPath := getEnvFilePath()
+		err = godotenv.Load(envPath)
+		if err != nil {
+			panic("Error loading .env file : " + err.Error())
+		}
 	}
 }
 
@@ -34,4 +42,15 @@ func main() {
 
 	api.InitDatabase()
 	controller.StartAndServe()
+}
+
+func getEnvFilePath() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		fmt.Println("No caller information")
+	}
+
+	dir := filepath.Dir(filename)
+	envPath := filepath.Join(dir, ".env")
+	return envPath
 }
