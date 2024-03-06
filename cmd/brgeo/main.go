@@ -5,14 +5,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"time"
 
 	"log/slog"
 
+	"github.com/charmbracelet/log"
 	"github.com/joho/godotenv"
 	"github.com/jvanrhyn/brgeo/controller"
 	"github.com/jvanrhyn/brgeo/internal/api"
-	"github.com/lmittmann/tint"
 )
 
 func init() {
@@ -30,15 +29,21 @@ func init() {
 
 func main() {
 	w := os.Stderr
+	// Tint
+	// tint.NewHandler(w, &tint.Options{
+	// 	Level:      slog.LevelDebug,
+	// 	TimeFormat: time.RFC3339Nano,
+	// })
+	// log by charm
+	handler := log.New(w)
+	handler.SetLevel(log.DebugLevel)
 
 	// set global logger with custom options
 	slog.SetDefault(slog.New(
-		tint.NewHandler(w, &tint.Options{
-			Level:      slog.LevelDebug,
-			TimeFormat: time.RFC3339Nano,
-		}),
-	))
+		handler))
 	slog.Info("Starting the application")
+
+	slog.Debug("InitDatabase called")
 
 	api.InitDatabase()
 	controller.StartAndServe()

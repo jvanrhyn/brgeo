@@ -50,11 +50,11 @@ func getGeoInfo(c *fiber.Ctx) error {
 	geo, retry := api.GetGeoInfo(ipaddress)
 	go slog.Info("Retrieval information", "ipaddress", ipaddress, "retries", retry)
 
-	lresp := model.LookupResponse{}
+	response := model.LookupResponse{}
 
 	// Copy attributes between two structures
 	// where structs have the same fields
-	err = copier.Copy(&lresp, &geo)
+	err = copier.Copy(&response, &geo)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func getGeoInfo(c *fiber.Ctx) error {
 	api.Record(&req)
 
 	// Store the item in the cache
-	err = api.AddCacheItem(ipaddress, &lresp)
+	err = api.AddCacheItem(ipaddress, &response)
 	if err != nil {
 		stack := err.(*errors.Error).ErrorStack()
 		go slog.Error("Error adding item to cache", "error", err, "stacktrace", stack)
@@ -76,7 +76,7 @@ func getGeoInfo(c *fiber.Ctx) error {
 		go slog.Info("Added item to cache for ip", "ipaddress", ipaddress)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(lresp)
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 func clearCache(c *fiber.Ctx) error {
