@@ -38,7 +38,7 @@ func main() {
 	// log by charm
 	handler := log.New(w)
 	handler.SetLevel(log.DebugLevel)
-	handler.SetTimeFormat(time.RFC3339Nano)
+	handler.SetTimeFormat(time.Kitchen)
 	handler.SetReportTimestamp(true)
 
 	// set global logger with custom options
