@@ -9,9 +9,10 @@ create_build_folder:
 	mkdir -p bin
 
 copy_env:
-	@envfile=$$(find . -name ".env"); \
-	rm -r ${OUTPATH}/.env
-	cp -f $$envfile ${OUTPATH}/
+    @envfile=$$(find . -name ".env"); \
+    if [ -f ${OUTPATH}/.env ]; then rm -f ${OUTPATH}/.env; fi; \
+    cp -f $$envfile ${OUTPATH}/ 
+
 
 test:
 	go test -race -v ./...

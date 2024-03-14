@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
+	"strings"
 
 	"github.com/charmbracelet/huh/spinner"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/log"
@@ -50,25 +51,24 @@ func main() {
 		Action(action).
 		Run()
 
-	form = huh.NewForm(
-		huh.NewGroup(
-			huh.NewText().Title("IP Address").Lines(1).
-				Value(&ipAddress),
-			huh.NewText().Title("Country").Lines(1).
-				Value(&geoInfo.Country),
-			huh.NewText().Title("Region").Lines(1).
-				Value(&geoInfo.Region),
-			huh.NewText().Title("City").Lines(1).
-				Value(&geoInfo.City)))
+	var sb strings.Builder
 
-	err = form.Run()
-	if err != nil {
-		log.Error(err)
-	}
+	fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", ipAddress)
+	fmt.Fprintf(&sb, "\n\nIP City : %s", geoInfo.City)
+	fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", geoInfo.Region)
+	fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", geoInfo.Country)
+
+	fmt.Println(
+		lipgloss.NewStyle().
+			Width(60).
+			BorderStyle(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("63")).
+			Padding(1, 2).
+			Render(sb.String()),
+	)
 }
 
 func getGeoInfo(ipAddress string) (*GeoInfo, error) {
-	time.Sleep(time.Second * 2)
 	resp, err := http.Get(fmt.Sprintf("http://localhost:3000/api/lookup/%s", ipAddress))
 	if err != nil {
 		return nil, err
