@@ -10,9 +10,11 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 )
 
@@ -38,6 +40,17 @@ type (
 )
 
 func main() {
+
+	w := os.Stderr
+	handler := log.New(w)
+	handler.SetLevel(log.DebugLevel)
+	handler.SetTimeFormat(time.Kitchen)
+	handler.SetReportTimestamp(true)
+
+	// set global logger with custom options
+	slog.SetDefault(slog.New(
+		handler))
+
 	m := NewModel()
 
 	prog := tea.NewProgram(m, tea.WithAltScreen())
@@ -73,16 +86,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.KeyEnter:
 			v := m.textinput.Value()
-			if v == "quit" || v == "" {
-				os.Exit(0)
-			}
-
 			if !ValidateIP(v) {
 				m.err = errors.New("invalid ip address")
-				return m, nil
+			} else {
+				m.err = nil // Clear the previous error
+				cmd = handleGeoLookup(v)
 			}
 
-			return m, handGeoleLookup(v)
+			m.textinput.Reset() // Reset the input field for new input
+			return m, cmd
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		}
@@ -91,9 +103,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.geoInfo = msg.GeoInfo
 		if msg.Err != nil {
 			m.err = msg.Err
-			return m, tea.Quit
+		} else {
+			m.err = nil
+			m.textinput.Reset()
 		}
-
+		m.textinput.Reset() // Reset the input field after displaying the geo lookup result
 		return m, nil
 	}
 
@@ -102,27 +116,33 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	s := m.textinput.View() + "\n\n"
-	m.textinput.Reset()
+	// Define styles
+	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#008ACC"))
+	staticTextStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("240")) // Grey
+	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#EF9704"))
+	errorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#C62D16"))
+
+	// Build the view string with styles
+	s := titleStyle.Render("Geo-location Lookup") + "\n\n" + m.textinput.View() + "\n\n"
 
 	if m.err != nil {
-		s += "Error : " + m.err.Error()
+		s += staticTextStyle.Render("Error : ") + errorStyle.Render(m.err.Error())
 		return s
 	}
 
 	if m.geoInfo.Country != "" {
-		s += "Looking up : " + m.geoInfo.IPAddress + "\n"
-		s += "Region  : " + m.geoInfo.Region + "\n"
-		s += "City    : " + m.geoInfo.City + "\n"
-		s += "Country : " + m.geoInfo.Country + "\n"
+		s += staticTextStyle.Render("Looking up: ") + valueStyle.Render(m.geoInfo.IPAddress) + "\n" +
+			staticTextStyle.Render("Region: ") + valueStyle.Render(m.geoInfo.Region) + "\n" +
+			staticTextStyle.Render("City: ") + valueStyle.Render(m.geoInfo.City) + "\n" +
+			staticTextStyle.Render("Country: ") + valueStyle.Render(m.geoInfo.Country)
 	}
 	return s
 }
 
-func handGeoleLookup(v string) tea.Cmd {
+func handleGeoLookup(v string) tea.Cmd {
 	return func() tea.Msg {
 		geo, err := getGeoInfo(v)
-		if err == nil {
+		if err != nil {
 			log.Error(err)
 		}
 
@@ -134,30 +154,32 @@ func handGeoleLookup(v string) tea.Cmd {
 }
 
 func getGeoInfo(ipAddress string) (GeoInfo, error) {
-	resp, err := http.Get(fmt.Sprintf("http://localhost:3000/api/lookup/%s", ipAddress))
-	if err != nil {
-		return GeoInfo{}, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Error(err)
-		}
-	}(resp.Body)
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return GeoInfo{}, err
-	}
-
 	var geoInfo GeoInfo
-	err = json.Unmarshal(body, &geoInfo)
-	if err != nil {
-		return GeoInfo{}, err
+	var err error
+	maxRetries := 3               // Maximum number of retries
+	retryDelay := 1 * time.Second // Initial delay, doubled on each retry
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		resp, err := http.Get(fmt.Sprintf("http://localhost:3000/api/lookup/%s", ipAddress))
+		if err == nil {
+			defer resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				body, err := io.ReadAll(resp.Body)
+				if err == nil {
+					err = json.Unmarshal(body, &geoInfo)
+					if err == nil {
+						geoInfo.IPAddress = ipAddress
+						return geoInfo, nil // Success
+					}
+				}
+			}
+		}
+
+		time.Sleep(retryDelay)
+		retryDelay *= 2 // Exponential backoff
 	}
 
-	geoInfo.IPAddress = ipAddress
-	return geoInfo, nil
+	return GeoInfo{}, fmt.Errorf("failed to get geo info after %d attempts: %v", maxRetries, err)
 }
 
 func ValidateIP(ip string) bool {
