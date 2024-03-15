@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -86,7 +85,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.KeyEnter:
 			v := m.textinput.Value()
-			if !ValidateIP(v) {
+			if !validateIP(v) {
 				m.err = errors.New("invalid ip address")
 			} else {
 				m.err = nil // Clear the previous error
@@ -182,18 +181,18 @@ func getGeoInfo(ipAddress string) (GeoInfo, error) {
 	return GeoInfo{}, fmt.Errorf("failed to get geo info after %d attempts: %v", maxRetries, err)
 }
 
-func ValidateIP(ip string) bool {
-	// Try parsing as an IP address using net.ParseIP
+func validateIP(ip string) bool {
 	address := net.ParseIP(ip)
-	if address != nil {
-		// Successfully parsed as IP. Let's do additional checks if needed:
-		if strings.Contains(ip, ".") {
-			// It's likely IPv4
-			return address.To4() != nil
-		} else if strings.Contains(ip, ":") {
-			// It's likely IPv6
-			return true // Basic IPv6 check for now
-		}
+	if address == nil {
+		return false
 	}
-	return false // Failed to parse or additional checks didn't pass
+
+	// Check if the IP address is IPv4 or IPv6
+	if ipv4 := address.To4(); ipv4 != nil {
+		return true
+	} else if ipv6 := address.To16(); ipv6 != nil {
+		return true
+	}
+
+	return false
 }
