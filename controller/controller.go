@@ -50,8 +50,6 @@ func getGeoInfo(c *fiber.Ctx) error {
 		}
 	}
 
-	// Remove this again
-	time.Sleep(5 * time.Second)
 	geo, retry := api.GetGeoInfo(ipaddress)
 	go slog.Info("Retrieval information", "ipaddress", ipaddress, "retries", retry)
 

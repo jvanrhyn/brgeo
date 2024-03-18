@@ -53,7 +53,7 @@ func main() {
 	slog.SetDefault(slog.New(
 		handler))
 
-	m := NewModel()
+	m := New()
 
 	prog := tea.NewProgram(m, tea.WithAltScreen())
 
@@ -63,7 +63,7 @@ func main() {
 	}
 }
 
-func NewModel() Model {
+func New() Model {
 	ti := textinput.New()
 	ti.Placeholder = "Enter IP Address"
 	ti.Reset()
@@ -82,7 +82,7 @@ func NewModel() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return textinput.Blink
+	return m.spinner.Tick
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -96,13 +96,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !validateIP(v) {
 				m.err = errors.New("invalid ip address")
 			} else {
-				m.err = nil // Clear the previous error
-				cmd = handleGeoLookup(v)
+				m.err = nil
 				m.loading = true
+				cmd = handleGeoLookup(v)
 			}
 
 			m.textinput.Reset() // Reset the input field for new input
 			return m, cmd
+
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		}
@@ -119,11 +120,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.textinput.Reset()
 		return m, nil
 
-	case spinner.TickMsg: // Update the spinner on each tick
+	case spinner.TickMsg:
 		m.spinner, cmd = m.spinner.Update(msg)
-		if m.loading {
-			m.spinner.Tick()
-		}
 		return m, cmd
 	}
 
@@ -154,8 +152,8 @@ func (m Model) View() string {
 
 	spinnerView := ""
 	if m.loading {
-		m.spinner.Update(m.spinner.Tick())
-		spinnerView = "\n\n" + m.spinner.View() + "\n\n"
+		spinnerView += fmt.Sprintf("\n\n%s Looking up Geo location.\n\n", m.spinner.View())
+
 	}
 
 	dataView := ""
