@@ -55,7 +55,7 @@ func main() {
 
 	m := New()
 
-	prog := tea.NewProgram(m, tea.WithAltScreen())
+	prog := tea.NewProgram(m)
 
 	_, err := prog.Run()
 	if err != nil {
