@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -29,7 +30,9 @@ type (
 		title     string
 		geoInfo   GeoInfo
 		textinput textinput.Model
+		spinner   spinner.Model
 		err       error
+		loading   bool
 	}
 
 	GeoResponseMsg struct {
@@ -66,10 +69,15 @@ func NewModel() Model {
 	ti.Reset()
 	ti.Focus()
 
+	s := spinner.New()
+	s.Spinner = spinner.Dot
+
 	return Model{
 		title:     "Geo-location lookup",
 		textinput: ti,
 		geoInfo:   GeoInfo{},
+		spinner:   s,
+		loading:   false,
 	}
 }
 
@@ -90,6 +98,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.err = nil // Clear the previous error
 				cmd = handleGeoLookup(v)
+				m.loading = true
 			}
 
 			m.textinput.Reset() // Reset the input field for new input
@@ -106,11 +115,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.err = nil
 			m.textinput.Reset()
 		}
-		m.textinput.Reset() // Reset the input field after displaying the geo lookup result
+		m.loading = false
+		m.textinput.Reset()
 		return m, nil
+
+	case spinner.TickMsg: // Update the spinner on each tick
+		m.spinner, cmd = m.spinner.Update(msg)
+		if m.loading {
+			m.spinner.Tick()
+		}
+		return m, cmd
 	}
 
 	m.textinput, cmd = m.textinput.Update(msg)
+	m.spinner, _ = m.spinner.Update(msg)
 	return m, cmd
 }
 
@@ -121,21 +139,36 @@ func (m Model) View() string {
 	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#EF9704"))
 	errorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#C62D16"))
 
-	// Build the view string with styles
-	s := titleStyle.Render("Geo-location Lookup") + "\n\n" + m.textinput.View() + "\n\n"
+	titleView := titleStyle.Render("Geo-location Lookup")
+	inputView := ""
 
-	if m.err != nil {
-		s += staticTextStyle.Render("Error : ") + errorStyle.Render(m.err.Error())
-		return s
+	if !m.loading {
+		// Build the view string with styles
+		inputView += "\n\n" + m.textinput.View() + "\n\n"
 	}
 
+	if m.err != nil {
+		errorView := staticTextStyle.Render("Error : ") + errorStyle.Render(m.err.Error())
+		return titleView + errorView + inputView
+	}
+
+	spinnerView := ""
+	if m.loading {
+		m.spinner.Update(m.spinner.Tick())
+		spinnerView = "\n\n" + m.spinner.View() + "\n\n"
+	}
+
+	dataView := ""
+
 	if m.geoInfo.Country != "" {
-		s += staticTextStyle.Render("Looking up: ") + valueStyle.Render(m.geoInfo.IPAddress) + "\n" +
+
+		dataView += "\n\n"
+		dataView += staticTextStyle.Render("Looking up: ") + valueStyle.Render(m.geoInfo.IPAddress) + "\n" +
 			staticTextStyle.Render("Region: ") + valueStyle.Render(m.geoInfo.Region) + "\n" +
 			staticTextStyle.Render("City: ") + valueStyle.Render(m.geoInfo.City) + "\n" +
 			staticTextStyle.Render("Country: ") + valueStyle.Render(m.geoInfo.Country)
 	}
-	return s
+	return titleView + spinnerView + dataView + inputView
 }
 
 func handleGeoLookup(v string) tea.Cmd {
