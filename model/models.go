@@ -26,7 +26,7 @@ type (
 		ContinentCode string      `json:"continent_code"`
 		Latitude      interface{} `json:"latitude"`
 		Longitude     interface{} `json:"longitude"`
-		MetroCode     string      `json:"metro_code"`
+		MetroCode     interface{} `json:"metro_code"`
 		Timezone      string      `json:"timezone"`
 		Datetime      interface{} `json:"datetime"`
 	}

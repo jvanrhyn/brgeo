@@ -44,7 +44,10 @@ func getGeoInfo(c *fiber.Ctx) error {
 	cg, err := api.GetCacheById(ipaddress)
 	if err == nil {
 		go slog.Info("Retrieved item from cache for ip", "ipaddress", ipaddress)
-		c.Status(fiber.StatusOK).JSON(cg)
+		err = c.Status(fiber.StatusOK).JSON(cg)
+		if err != nil {
+			slog.Error(err.Error())
+		}
 	}
 
 	geo, retry := api.GetGeoInfo(ipaddress)
