@@ -30,12 +30,6 @@ func init() {
 
 func main() {
 	w := os.Stderr
-	// Tint
-	// tint.NewHandler(w, &tint.Options{
-	// 	Level:      slog.LevelDebug,
-	// 	TimeFormat: time.RFC3339Nano,
-	// })
-	// log by charm
 	handler := log.New(w)
 	handler.SetLevel(log.DebugLevel)
 	handler.SetTimeFormat(time.Kitchen)
