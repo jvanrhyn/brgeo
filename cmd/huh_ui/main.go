@@ -53,10 +53,10 @@ func main() {
 
 	var sb strings.Builder
 
-	fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", ipAddress)
-	fmt.Fprintf(&sb, "\n\nIP City : %s", geoInfo.City)
-	fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", geoInfo.Region)
-	fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", geoInfo.Country)
+	_, _ = fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", ipAddress)
+	_, _ = fmt.Fprintf(&sb, "\n\nIP City : %s", geoInfo.City)
+	_, _ = fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", geoInfo.Region)
+	_, _ = fmt.Fprintf(&sb, "\n\nIP Address Searched : %s", geoInfo.Country)
 
 	fmt.Println(
 		lipgloss.NewStyle().

@@ -82,6 +82,7 @@ func getGeoInfo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
+// clearCache clears the cache by flushing all entries and returns a status code of 200.
 func clearCache(c *fiber.Ctx) error {
 	go slog.Info("Clearing cache")
 	api.Cache.Flush()

@@ -199,38 +199,53 @@ func handleGeoLookup(v string) tea.Cmd {
 	}
 }
 
-// getGeoInfo is a function that takes an IP address as a string and returns the geolocation information for that IP and any error that occurred.
-// It makes a GET request to a local API endpoint with the IP address and reads the response.
-// If the response status is OK, it reads the response body and unmarshals it into a GeoInfo struct.
-// If any error occurs during this process, it retries the request up to a maximum number of times with an exponential backoff delay.
-// If it still fails after the maximum number of retries, it returns an empty GeoInfo struct and an error indicating the failure.
 func getGeoInfo(ipAddress string) (GeoInfo, error) {
 	var geoInfo GeoInfo
-	var err error
 	maxRetries := 3               // Maximum number of retries
 	retryDelay := 1 * time.Second // Initial delay, doubled on each retry
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		resp, err := http.Get(fmt.Sprintf("http://localhost:3000/api/lookup/%s", ipAddress))
+		var err error
+		geoInfo, err = fetchGeoInfo(ipAddress)
 		if err == nil {
-			defer resp.Body.Close()
-			if resp.StatusCode == http.StatusOK {
-				body, err := io.ReadAll(resp.Body)
-				if err == nil {
-					err = json.Unmarshal(body, &geoInfo)
-					if err == nil {
-						geoInfo.IPAddress = ipAddress
-						return geoInfo, nil // Success
-					}
-				}
-			}
+			return geoInfo, nil
 		}
 
 		time.Sleep(retryDelay)
 		retryDelay *= 2 // Exponential backoff
 	}
 
-	return GeoInfo{}, fmt.Errorf("failed to get geo info after %d attempts: %v", maxRetries, err)
+	return GeoInfo{}, fmt.Errorf("failed to get geo info after %d attempts", maxRetries)
+}
+
+func fetchGeoInfo(ipAddress string) (GeoInfo, error) {
+	var geoInfo GeoInfo
+	resp, err := http.Get(fmt.Sprintf("http://localhost:3000/api/lookup/%s", ipAddress))
+	if err != nil {
+		return GeoInfo{}, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			slog.Error(err.Error())
+		}
+	}(resp.Body)
+
+	if resp.StatusCode == http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return GeoInfo{}, err
+		}
+
+		err = json.Unmarshal(body, &geoInfo)
+		if err != nil {
+			return GeoInfo{}, err
+		}
+		geoInfo.IPAddress = ipAddress
+		return geoInfo, nil
+	}
+
+	return GeoInfo{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 }
 
 // validateIP is a function that takes an IP address as a string and returns a boolean indicating whether the IP address is valid.
