@@ -1,4 +1,3 @@
-
 BIN=go
 OUTPATH=./bin
 
@@ -9,10 +8,9 @@ create_build_folder:
 	mkdir -p bin
 
 copy_env:
-    @envfile=$$(find . -name ".env"); \
-    if [ -f ${OUTPATH}/.env ]; then rm -f ${OUTPATH}/.env; fi; \
-    cp -f $$envfile ${OUTPATH}/ 
-
+	@envfile=$$(find . -name ".env"); \
+	if [ -f ${OUTPATH}/.env ]; then rm -f ${OUTPATH}/.env; fi; \
+	cp -f $$envfile ${OUTPATH}/
 
 test:
 	go test -race -v ./...
@@ -25,7 +23,7 @@ watch-bench:
 	reflex -t 50ms -s -- sh -c 'go test -benchmem -count 3 -bench ./...'
 
 coverage:
-	${BIN} test -v ./... -coverprofile=cover.out -covermode=atomic .
+	${BIN} test -v ./... -coverprofile=cover.out -covermode=atomic
 	${BIN} tool cover -html=cover.out -o cover.html
 
 tools:

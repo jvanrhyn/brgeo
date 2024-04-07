@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"os"
-	"path/filepath"
-	"runtime"
 	"time"
 
 	"log/slog"
@@ -26,7 +23,7 @@ func init() {
 	// Read Configuration data from the .env file in the project
 	err := godotenv.Load()
 	if err != nil {
-		envPath := getEnvFilePath()
+		envPath := api.GetEnvFilePath()
 		err = godotenv.Load(envPath)
 		if err != nil {
 			panic("Error loading .env file : " + err.Error())
@@ -70,20 +67,4 @@ func main() {
 
 	api.InitDatabase()
 	controller.StartAndServe()
-}
-
-// getEnvFilePath retrieves the absolute file path of the .env file in the directory
-// where the calling function is located.
-// If the caller information cannot be obtained, a message will be printed to the console.
-// The function combines the directory path and the name of the .env file using filepath.Join.
-// Returns the absolute file path of the .env file.
-func getEnvFilePath() string {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		fmt.Println("No caller information")
-	}
-
-	dir := filepath.Dir(filename)
-	envPath := filepath.Join(dir, ".env")
-	return envPath
 }

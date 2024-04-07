@@ -3,8 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
+	"github.com/jvanrhyn/brgeo/internal/api"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/huh/spinner"
@@ -23,7 +26,22 @@ type (
 	}
 )
 
-var ipAddress string
+var (
+	ipAddress string
+)
+
+func init() {
+
+	// Read Configuration data from the .env file in the project
+	err := godotenv.Load()
+	if err != nil {
+		envPath := api.GetEnvFilePath()
+		err = godotenv.Load(envPath)
+		if err != nil {
+			panic("Error loading .env file : " + err.Error())
+		}
+	}
+}
 
 func main() {
 	form := huh.NewForm(
@@ -69,7 +87,7 @@ func main() {
 }
 
 func getGeoInfo(ipAddress string) (*GeoInfo, error) {
-	resp, err := http.Get(fmt.Sprintf("http://localhost:3000/api/lookup/%s", ipAddress))
+	resp, err := http.Get(fmt.Sprintf("%s/%s", os.Getenv("UI_URL"), ipAddress))
 	if err != nil {
 		return nil, err
 	}
