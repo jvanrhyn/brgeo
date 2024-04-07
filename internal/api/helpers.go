@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -16,7 +17,7 @@ func GetEnvFilePath() string {
 
 	ex, err := os.Executable()
 	if err != nil {
-		// Handle the error
+		slog.Error(err.Error())
 	}
 
 	if ex != "" {
