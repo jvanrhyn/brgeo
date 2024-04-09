@@ -1,10 +1,19 @@
 package api
 
 import (
+	"github.com/joho/godotenv"
 	"log/slog"
 	"os"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		slog.Error("Error loading .env file")
+	}
+
+}
 
 func TestCanGetLocation(t *testing.T) {
 
