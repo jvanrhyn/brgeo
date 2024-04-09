@@ -38,10 +38,8 @@ func StartAndServe() {
 func getGeoInfo(c *fiber.Ctx) error {
 	ipaddress := c.Params("ipaddress")
 
-	var err error
-
 	// Try and find the element in the Cache
-	cg, err := api.GetCacheById(ipaddress)
+	var cg, err = api.GetCacheById(ipaddress)
 	if err == nil {
 		go slog.Info("Retrieved item from cache for ip", "ipaddress", ipaddress)
 		err = c.Status(fiber.StatusOK).JSON(cg)

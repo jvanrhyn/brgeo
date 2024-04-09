@@ -48,6 +48,10 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 		slog.Info("Attempts Counter", "attempt", i)
 		resp, err = client.Do(req)
 		if err == nil && resp.StatusCode == http.StatusOK {
+			err := resp.Body.Close()
+			if err != nil {
+				return model.GeoData{}, 0
+			}
 			break
 		}
 
@@ -64,18 +68,18 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 		}
 	}
 
-	defer resp.Body.Close()
+	if resp != nil {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			slog.Error(err.Error())
+		}
+		var geoResponse model.Response
+		err = json.Unmarshal(body, &geoResponse)
+		if err != nil {
+			slog.Error(err.Error())
+		}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
+		return geoResponse.Data.Geo, retry
 	}
-
-	var geoResponse model.Response
-	err = json.Unmarshal(body, &geoResponse)
-	if err != nil {
-		panic(err)
-	}
-
-	return geoResponse.Data.Geo, retry
+	return model.GeoData{}, 0
 }

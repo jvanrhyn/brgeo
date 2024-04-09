@@ -41,7 +41,7 @@ func init() {
 // The SetTimeFormat function sets the time format to time.Kitchen.
 // The SetReportTimestamp function enables reporting timestamps in logs.
 //
-// The slogger package is used to set the default logger to the created logger.
+// The slog package is used to set the default logger to the created logger.
 //
 // The Info log message "Starting the application" is printed using the slog.Info function.
 //

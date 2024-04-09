@@ -8,7 +8,7 @@ import (
 	"runtime"
 )
 
-// getEnvFilePath retrieves the absolute file path of the .env file in the directory
+// GetEnvFilePath retrieves the absolute file path of the .env file in the directory
 // where the calling function is located.
 // If the caller information cannot be obtained, a message will be printed to the console.
 // The function combines the directory path and the name of the .env file using filepath.Join.
