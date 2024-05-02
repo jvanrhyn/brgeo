@@ -44,7 +44,9 @@ func getGeoInfo(c *fiber.Ctx) error {
 		go slog.Info("Retrieved item from cache for ip", "ipaddress", ipaddress)
 		err = c.Status(fiber.StatusOK).JSON(cg)
 		if err != nil {
-			slog.Error(err.Error())
+			stack := err.(*errors.Error).ErrorStack()
+			go slog.Error("error while retrieving item from cache", "error", err, "stacktrace", stack)
+			return err
 		}
 	}
 
@@ -66,7 +68,12 @@ func getGeoInfo(c *fiber.Ctx) error {
 		LookupStatus: true,
 	}
 
-	api.Record(&req)
+	err = api.Record(&req)
+	if err != nil {
+		stack := err.(*errors.Error).ErrorStack()
+		go slog.Error("error while recording lookup", "error", err, "stacktrace", stack)
+		return err
+	}
 
 	// Store the item in the cache
 	err = api.AddCacheItem(ipaddress, &response)
@@ -80,7 +87,21 @@ func getGeoInfo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
-// clearCache clears the cache by flushing all entries and returns a status code of 200.
+// clearCache clears the cache and logs an info message.
+//
+// It takes a fiber.Ctx parameter which represents the context of the HTTP request.
+//
+// It returns an error if there is an issue with the cache clearing operation.
+//
+// It sends a status OK response to the client after clearing the cache.
+//
+// Example:
+//
+//	err := clearCache(c)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	c.SendStatus(fiber.StatusOK)
 func clearCache(c *fiber.Ctx) error {
 	go slog.Info("Clearing cache")
 	api.Cache.Flush()

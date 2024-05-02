@@ -1,3 +1,4 @@
+// Package api provides functions to get the environment file path.
 package api
 
 import (
@@ -8,11 +9,17 @@ import (
 	"runtime"
 )
 
-// GetEnvFilePath retrieves the absolute file path of the .env file in the directory
-// where the calling function is located.
-// If the caller information cannot be obtained, a message will be printed to the console.
-// The function combines the directory path and the name of the .env file using filepath.Join.
-// Returns the absolute file path of the .env file.
+// GetEnvFilePath returns the path to the .env file in the current executable's directory.
+// If the executable's path is not available, it falls back to the caller's path.
+//
+// If an error occurs while retrieving the executable's path, it logs the error and returns an empty string.
+//
+// The function does not return any error, as it only logs errors and does not propagate them.
+//
+// Example:
+//
+//	envPath := api.GetEnvFilePath()
+//	fmt.Println(envPath)
 func GetEnvFilePath() string {
 
 	ex, err := os.Executable()

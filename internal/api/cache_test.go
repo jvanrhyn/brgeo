@@ -1,10 +1,9 @@
 package api
 
 import (
+	"github.com/jvanrhyn/brgeo/model"
 	"os"
 	"testing"
-
-	"github.com/jvanrhyn/brgeo/model"
 )
 
 func TestAddCacheItem(t *testing.T) {
