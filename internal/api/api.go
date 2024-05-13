@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/vincentfree/opentelemetry/otelslog"
 	"io"
 	"log/slog"
 	"net/http"
@@ -12,11 +13,21 @@ import (
 	"github.com/jvanrhyn/brgeo/model"
 )
 
+var (
+	logr = otelslog.New()
+)
+
+func init() {
+
+}
+
 // GetGeoInfo accepts an IP Address to perform a lookup
 // of the geolocation information of the IP Address
 // form KeyCDNs' Geo service.
 // This service is rate limited to a maximum of 3 calls per second.
 func GetGeoInfo(ipaddress string) (model.GeoData, int) {
+
+	logr.Info("GetGeoInfo called")
 
 	client := &http.Client{}
 	path := os.Getenv("SERVICE_URL") + "?host=" + ipaddress
@@ -59,6 +70,8 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 		if i < maxRetries-1 {
 			sleepDuration := time.Duration(float64(baseInterval) * float64(i+1) * retryFactor)
 			retry = i
+
+			logr.Info("Sleeping on error", "duration", sleepDuration, "error", err)
 			slog.Info("Sleeping on error", "duration", sleepDuration, "error", err)
 			time.Sleep(sleepDuration)
 			continue
