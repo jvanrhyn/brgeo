@@ -2,13 +2,14 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/vincentfree/opentelemetry/otelslog"
 	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/vincentfree/opentelemetry/otelslog"
 
 	"github.com/jvanrhyn/brgeo/model"
 )
@@ -58,12 +59,11 @@ func GetGeoInfo(ipaddress string) (model.GeoData, int) {
 	for i := 0; i < maxRetries; i++ {
 		slog.Info("Attempts Counter", "attempt", i)
 		resp, err = client.Do(req)
-		if err == nil && resp.StatusCode == http.StatusOK {
-			err := resp.Body.Close()
-			if err != nil {
-				return model.GeoData{}, 0
+		if err == nil {
+			defer resp.Body.Close() // Ensure the body is always closed
+			if resp.StatusCode == http.StatusOK {
+				break
 			}
-			break
 		}
 
 		// If this wasn't the last attempt, sleep for a while before retrying
