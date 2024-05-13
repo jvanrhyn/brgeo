@@ -1,11 +1,10 @@
 package main
 
 import (
-	"context"
-	"github.com/vincentfree/opentelemetry/otelslog"
 	"os"
-	"runtime"
 	"time"
+
+	"github.com/vincentfree/opentelemetry/otelslog"
 
 	"log/slog"
 
@@ -13,8 +12,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/jvanrhyn/brgeo/controller"
 	"github.com/jvanrhyn/brgeo/internal/api"
-	"github.com/jvanrhyn/brgeo/internal/metrics"
-	"go.opentelemetry.io/otel/metric"
 )
 
 // init is the function that initializes the application by reading Configuration data
@@ -58,13 +55,6 @@ func init() {
 // This function does not return anything.
 func main() {
 
-	meter, err := metrics.NewMeter(context.Background())
-	if err != nil {
-		panic(err)
-	}
-
-	go collectMachineResourceMetrics(meter)
-
 	w := os.Stderr
 	handler := log.New(w)
 	handler.SetLevel(log.DebugLevel)
@@ -83,28 +73,4 @@ func main() {
 
 	api.InitDatabase()
 	controller.StartAndServe()
-}
-
-func collectMachineResourceMetrics(meter metric.Meter) {
-	period := 5 * time.Second
-	ticker := time.NewTicker(period)
-	var Mb uint64 = 1_048_576 // number of bytes in a MB
-	for {
-		select {
-		case <-ticker.C:
-			// This will be executed every "period" of time passes
-			meter.Float64ObservableGauge(
-				"process.allocated_memory",
-				metric.WithFloat64Callback(
-					func(ctx context.Context, fo metric.Float64Observer) error {
-						var memStats runtime.MemStats
-						runtime.ReadMemStats(&memStats)
-						allocatedMemoryInMB := float64(memStats.Alloc) / float64(Mb)
-						fo.Observe(allocatedMemoryInMB)
-						return nil
-					},
-				),
-			)
-		}
-	}
 }
